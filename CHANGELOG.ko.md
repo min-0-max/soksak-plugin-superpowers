@@ -2,6 +2,7 @@
 
 [English](CHANGELOG.md)
 
+- S9: `package.json`이 license MIT를 선언해서 registry가 release를 싣는다. version은 0.0.1이다.
 - S8: Workflow `ci.yml`과 `release.yml`이 push마다 검사하고 `make pack`으로 release한다.
 - S7: release build가 tarball을 header mode 그대로(`tar -xzpf`) 풀고, upstream 파일에 실행 bit가 있는 `files` 항목에 `executable: true`를 표시해요(`scripts/build-release.mjs`). `group/superpowers.js`는 member를 넘기고 boolean이 아닌 값을 거절해요. 테스트: `test/release-build.test.mjs`(제한적 umask 아래의 표시, bit가 없을 때 표시 없음)와 `test/group-shape.test.mjs`.
 - S6: group은 skill 폴더만 실어요. `group/files.js`는 release의 `skills/<name>` 폴더 파일을 `.claude/skills/<name>/<file>`에 담고, agent `superpowers`는 `.claude/skills/using-superpowers/SKILL.md`를 가리켜요. Plugin manifest와 hooks는 프로젝트 파일이 아니라서 더 이상 싣지 않아요. `folders`는 `.superpowers/`와 `.claude/skills/`를 나열해요. 테스트: `test/release-build.test.mjs`(9개), `test/group-shape.test.mjs`. Red: 이전 layout과 `.claude/skills/` 경로가 실패했어요.

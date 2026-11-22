@@ -2,6 +2,7 @@
 
 [한국어](CHANGELOG.ko.md)
 
+- S9: `package.json` declares the license MIT, so the registry lists the release; the version is 0.0.1.
 - S8: The workflows `ci.yml` and `release.yml` check each push and release with `make pack`.
 - S7: The release build extracts the tarball with its header modes (`tar -xzpf`) and marks each `files` entry whose upstream file has an execute bit with `executable: true` (`scripts/build-release.mjs`). `group/superpowers.js` passes the member through and refuses a value that is not a boolean. Tests: `test/release-build.test.mjs` (the mark under a restrictive umask, and no mark without the bit) and `test/group-shape.test.mjs`.
 - S6: The group ships only the skill folders. `group/files.js` holds the files of the release `skills/<name>` folders at `.claude/skills/<name>/<file>`, and the agent `superpowers` names `.claude/skills/using-superpowers/SKILL.md`. The plugin manifest and the hooks are not project files and are no longer shipped. `folders` lists `.superpowers/` and `.claude/skills/`. Tests: `test/release-build.test.mjs` (9 tests), `test/group-shape.test.mjs`; Red: the previous layout and the `.claude/skills/` paths failed.

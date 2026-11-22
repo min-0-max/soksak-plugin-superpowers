@@ -118,3 +118,8 @@ test("a file whose upstream header mode has no execute bit gets no executable me
   const { files } = await dataOf(out);
   assert.equal(files.some((file) => "executable" in file), false);
 }, (top) => chmodSync(join(top, "skills", "brainstorming", "scripts", "run.sh"), 0o644)));
+
+test("package.json declares the license that the registry index requires", () => {
+  const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  assert.equal(pkg.license, "MIT");
+});
