@@ -57,6 +57,11 @@ test("contributes holds one item of the agents.makers point, with range and modu
   assert.match(item.range, /^[<>=^~]*\d/);
 });
 
+// The agents.makers point is at version 0.0.1 of the agents plugin, so the item states the range ^0.0.1.
+test("the agents.makers item states the range ^0.0.1 of the point version", () => {
+  assert.equal(manifest.contributes["agents.makers"][0].range, "^0.0.1");
+});
+
 test("the contributed module is a relative path to a JavaScript module inside the plugin", () => {
   const [item] = manifest.contributes["agents.makers"];
   assert.match(item.module, /^[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+)*\.m?js$/, item.module);
