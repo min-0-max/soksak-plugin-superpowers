@@ -8,18 +8,14 @@ import { groupFrom } from "../group/superpowers.js";
 const manifest = JSON.parse(readFileSync(new URL("../plugin.json", import.meta.url), "utf8"));
 const item = manifest.contributes["agents.makers"][0];
 
-const AGENT = "skills/using-superpowers/SKILL.md";
+const AGENT = ".claude/skills/using-superpowers/SKILL.md";
 
 function data(overrides = {}) {
   return {
     agents: [{ name: "superpowers", path: AGENT, cli: "claude" }],
-    skills: ["skills/brainstorming", "skills/using-superpowers"],
+    skills: [".claude/skills/brainstorming", ".claude/skills/using-superpowers"],
     files: [
-      { path: ".claude-plugin/plugin.json", text: "{}\n" },
-      { path: "hooks/hooks.json", text: "{}\n" },
-      { path: "hooks/run-hook.cmd", text: "#!/bin/sh\n" },
-      { path: "hooks/session-start", text: "#!/bin/sh\n" },
-      { path: "skills/brainstorming/SKILL.md", text: "---\nname: brainstorming\n---\n" },
+      { path: ".claude/skills/brainstorming/SKILL.md", text: "---\nname: brainstorming\n---\n" },
       { path: AGENT, text: "---\nname: using-superpowers\n---\n" },
     ],
     ...overrides,
@@ -59,16 +55,16 @@ test("an agent path that names no entry of files is refused, and the error names
 
 test("a file outside the project folders is refused, and the error names the file", () => {
   const files = [...data().files, { path: "docs/README.md", text: "x" }];
-  assert.throws(() => groupFrom(data({ files })), /files\[6\]\.path.*docs\/README\.md/);
+  assert.throws(() => groupFrom(data({ files })), /files\[2\]\.path.*docs\/README\.md/);
 });
 
 test("a repeated file path is refused", () => {
-  const files = [...data().files, { path: "hooks/hooks.json", text: "again" }];
-  assert.throws(() => groupFrom(data({ files })), /files\[6\]\.path.*repeats/);
+  const files = [...data().files, { path: AGENT, text: "again" }];
+  assert.throws(() => groupFrom(data({ files })), /files\[2\]\.path.*repeats/);
 });
 
 test("the folders are the project paths that the upstream files and the .superpowers rules use", () => {
-  assert.deepEqual(groupFrom(data()).folders, [".superpowers/", ".claude-plugin/", "hooks/", "skills/"]);
+  assert.deepEqual(groupFrom(data()).folders, [".superpowers/", ".claude/skills/"]);
 });
 
 test("superpowers runs claude only, because its SessionStart hook needs claude", () => {
@@ -76,7 +72,7 @@ test("superpowers runs claude only, because its SessionStart hook needs claude",
 });
 
 test("the skill folders are project paths of the files", () => {
-  assert.deepEqual(groupFrom(data()).skills, ["skills/brainstorming", "skills/using-superpowers"]);
+  assert.deepEqual(groupFrom(data()).skills, [".claude/skills/brainstorming", ".claude/skills/using-superpowers"]);
 });
 
 test("superpowers sets no variables and prepends no PATH folders", () => {

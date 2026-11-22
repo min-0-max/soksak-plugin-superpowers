@@ -42,35 +42,36 @@ async function dataOf(out) {
   return import(pathToFileURL(join(out, "group", "files.js")).href);
 }
 
-test("the build writes the Claude plugin files at their upstream paths, and no other upstream file", () => withBuild(async ({ releaseFile, sha256, out }) => {
+test("the build writes the skill folders of the release under .claude/skills/, and no other upstream file", () => withBuild(async ({ releaseFile, sha256, out }) => {
   buildRelease({ releaseFile, sha256, version: VERSION, out });
   const { files } = await dataOf(out);
   assert.deepEqual(files.map((file) => file.path), [
-    ".claude-plugin/plugin.json",
-    "hooks/hooks.json",
-    "hooks/run-hook.cmd",
-    "hooks/session-start",
-    "skills/brainstorming/SKILL.md",
-    "skills/brainstorming/scripts/run.sh",
-    "skills/using-superpowers/SKILL.md",
-    "skills/using-superpowers/extra.md",
+    ".claude/skills/brainstorming/SKILL.md",
+    ".claude/skills/brainstorming/scripts/run.sh",
+    ".claude/skills/using-superpowers/SKILL.md",
+    ".claude/skills/using-superpowers/extra.md",
   ]);
+}));
+
+test("the Claude plugin files of the release (plugin manifest, hooks) are not shipped as project files", () => withBuild(async ({ releaseFile, sha256, out }) => {
+  buildRelease({ releaseFile, sha256, version: VERSION, out });
+  const { files, folders } = await dataOf(out);
+  assert.ok(!files.some((file) => /^(\.claude-plugin\/|hooks\/)/.test(file.path)));
 }));
 
 test("each file keeps the upstream text, and the cursor hook file is not shipped", () => withBuild(async ({ releaseFile, sha256, out }) => {
   buildRelease({ releaseFile, sha256, version: VERSION, out });
   const { files } = await dataOf(out);
   const text = (path) => files.find((file) => file.path === path).text;
-  assert.equal(text("hooks/session-start"), "#!/bin/sh\necho start\n");
-  assert.equal(text("skills/using-superpowers/SKILL.md"), "---\nname: using-superpowers\n---\nBody\n");
+  assert.equal(text(".claude/skills/using-superpowers/SKILL.md"), "---\nname: using-superpowers\n---\nBody\n");
   assert.equal(files.some((file) => file.path.includes("cursor")), false);
 }));
 
 test("the data module names the skill folders and the one agent of the group", () => withBuild(async ({ releaseFile, sha256, out }) => {
   buildRelease({ releaseFile, sha256, version: VERSION, out });
   const data = await dataOf(out);
-  assert.deepEqual(data.skills, ["skills/brainstorming", "skills/using-superpowers"]);
-  assert.deepEqual(data.agents, [{ name: "superpowers", path: "skills/using-superpowers/SKILL.md", cli: "claude" }]);
+  assert.deepEqual(data.skills, [".claude/skills/brainstorming", ".claude/skills/using-superpowers"]);
+  assert.deepEqual(data.agents, [{ name: "superpowers", path: ".claude/skills/using-superpowers/SKILL.md", cli: "claude" }]);
   const group = groupFrom(data);
   assert.deepEqual(group.agents, data.agents);
 }));

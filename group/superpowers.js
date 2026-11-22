@@ -1,12 +1,12 @@
 // The superpowers group of the agents.makers interface (agents docs/spec/makers.md). The agents plugin imports this module
 // and calls group() for each connected item. The release build writes group/files.js, a data module with the skill folders,
-// the agent and the Claude plugin files of the pinned obra/superpowers release, each file with its project path.
+// the agent and the files of the skill folders of the pinned obra/superpowers release, each with its project path under .claude/skills/.
 // superpowers changes no upstream file: the release build copies the text as the release holds it.
 
 const DATA_URL = new URL("./files.js", import.meta.url);
 
 // The project folders that the group creates; every file path lies inside one of them (agents docs/spec/makers.md).
-const FOLDERS = [".superpowers/", ".claude-plugin/", "hooks/", "skills/"];
+const FOLDERS = [".superpowers/", ".claude/skills/"];
 
 // Imports the data module that the release build wrote and returns the group object. A missing module, or one that does
 // not match the shape, rejects with an error that names the module and the field.
@@ -23,9 +23,9 @@ export function groupFrom(data) {
   return Object.freeze({
     id: "superpowers",
     name: "Superpowers",
-    // The Claude plugin files sit at the upstream paths, so the plugin root is the project root.
+    // The group ships no plugin manifest or hooks, so the plugin folder is the project root.
     plugin: ".",
-    // The SessionStart hook of the plugin needs claude, so the group runs claude only.
+    // The agent of the group is a claude agent.
     clis: ["claude"],
     agents,
     skills,
@@ -79,8 +79,8 @@ function checkAgents(data, files) {
 function checkSkills(data) {
   if (!Array.isArray(data.skills)) fail("skills", "must be an array");
   return data.skills.map((skill, i) => {
-    if (typeof skill !== "string" || !skill.startsWith("skills/") || skill.length <= "skills/".length || !hasPlainSegments(skill)) {
-      fail(`skills[${i}]`, "must be a project folder under skills/");
+    if (typeof skill !== "string" || !skill.startsWith(".claude/skills/") || skill.length <= ".claude/skills/".length || !hasPlainSegments(skill)) {
+      fail(`skills[${i}]`, "must be a project folder under .claude/skills/");
     }
     return skill;
   });

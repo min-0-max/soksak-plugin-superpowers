@@ -2,6 +2,7 @@
 
 [English](CHANGELOG.md)
 
+- S6: group은 skill 폴더만 실어요. `group/files.js`는 release의 `skills/<name>` 폴더 파일을 `.claude/skills/<name>/<file>`에 담고, agent `superpowers`는 `.claude/skills/using-superpowers/SKILL.md`를 가리켜요. Plugin manifest와 hooks는 프로젝트 파일이 아니라서 더 이상 싣지 않아요. `folders`는 `.superpowers/`와 `.claude/skills/`를 나열해요. 테스트: `test/release-build.test.mjs`(9개), `test/group-shape.test.mjs`. Red: 이전 layout과 `.claude/skills/` 경로가 실패했어요.
 - S5: release build가 obra/superpowers `v7.0.2`를 고정하고(`release/upstream.json`, codeload tarball의 sha256), data module `group/files.js`를 써요. 이 module은 skill 폴더, agent `superpowers`(주 skill 파일), upstream 경로의 Claude plugin 파일을 담아요. `group/superpowers.LICENSE`도 써요. `group()`은 module을 import해서 `files`를 반환해요. `folders`는 upstream 경로를 나열해요. 테스트: `test/release-build.test.mjs`(7개), `test/group-shape.test.mjs`, `test/manifest-shape.test.mjs`. Red: build script와 `groupFrom`이 없었어요.
 - S3: Plugin이 `group/superpowers.js`에서 superpowers group을 내보낸다. `group()`은 agents.makers interface의 group 객체를 반환한다. 교정한 plugin 폴더, CLI는 claude만, agent 정의 없음, 스킬 폴더, `.superpowers/` 프로젝트 폴더, plan, spec, worktree 위치 규칙을 담는다. `agents.makers` item은 `id`와 `name`을 담고, `package.json`은 module을 배포한다. `test/group-shape.test.mjs`가 각 멤버를 리터럴 기대값으로 검사한다.
 - S4: `agents.makers` item의 range는 `^0.0.1`이다. agents plugin이 선언한 point의 version이다. `test/manifest-shape.test.mjs`가 range를 리터럴 기대값으로 검사한다.

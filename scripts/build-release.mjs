@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // Builds the generated files of the superpowers group from the obra/superpowers release pinned in release/upstream.json:
-//   group/files.js              the data module: the skill folders (skills/<name> with SKILL.md), the agent (the main skill file),
-//                               and each Claude plugin file of the release with its upstream path and text
+//   group/files.js              the data module: the skill folders (.claude/skills/<name> with SKILL.md), the agent (the main
+//                               skill file) and every file of those folders with its project path and text
 //   group/superpowers.LICENSE   the LICENSE of the release
-// The Claude plugin files are .claude-plugin/plugin.json, hooks/hooks.json, hooks/run-hook.cmd, hooks/session-start and every
-// file under skills/. hooks/hooks-cursor.json and the other upstream folders belong to other agent CLIs and are not shipped.
+// The skill folders of the release are skills/<name>, and the project copy lies under .claude/skills/, where Claude Code reads
+// project skills. The plugin manifest and the hooks are a Claude Code plugin install concern, so they are not project files.
 // The release file must equal its sha256 pin before anything is extracted or written. The build reads no other network address.
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -14,8 +14,9 @@ import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const FIXED_FILES = [".claude-plugin/plugin.json", "hooks/hooks.json", "hooks/run-hook.cmd", "hooks/session-start"];
-const AGENT_FILE = "skills/using-superpowers/SKILL.md";
+// The project folder of each upstream skill folder, and the agent: the main skill file of the using-superpowers skill.
+const SKILL_FOLDER = ".claude/skills";
+const AGENT_FILE = `${SKILL_FOLDER}/using-superpowers/SKILL.md`;
 
 // listFiles returns the paths of the files under folder, relative to it, with a slash between the parts.
 function listFiles(folder, prefix = "") {
@@ -50,26 +51,21 @@ export function buildRelease({ releaseFile, sha256, version, out }) {
     const license = join(source, "LICENSE");
     if (!existsSync(license)) throw new Error(`release file holds no LICENSE at its top: ${releaseFile}`);
 
-    const files = FIXED_FILES.map((file) => {
-      if (!existsSync(join(source, file))) throw new Error(`release file holds no ${file}`);
-      return { path: file, text: readText(join(source, file), file) };
-    });
-
+    const files = [];
     const skillSource = join(source, "skills");
     const skills = readdirSync(skillSource, { withFileTypes: true })
       .filter((entry) => entry.isDirectory() && existsSync(join(skillSource, entry.name, "SKILL.md")))
       .map((entry) => entry.name)
       .sort();
-    if (!skills.includes("using-superpowers")) throw new Error(`release file holds no ${AGENT_FILE}`);
+    if (!skills.includes("using-superpowers")) throw new Error(`release file holds no skills/using-superpowers/SKILL.md`);
     for (const name of skills) {
       for (const file of listFiles(join(skillSource, name)).sort()) {
-        const path = `skills/${name}/${file}`;
-        files.push({ path, text: readText(join(source, path), path) });
+        files.push({ path: `${SKILL_FOLDER}/${name}/${file}`, text: readText(join(source, "skills", name, file), `skills/${name}/${file}`) });
       }
     }
 
     const agents = [{ name: "superpowers", path: AGENT_FILE, cli: "claude" }];
-    const data = `export const agents = ${JSON.stringify(agents, null, 2)};\n\nexport const skills = ${JSON.stringify(skills.map((name) => `skills/${name}`), null, 2)};\n\nexport const files = ${JSON.stringify(files, null, 2)};\n`;
+    const data = `export const agents = ${JSON.stringify(agents, null, 2)};\n\nexport const skills = ${JSON.stringify(skills.map((name) => `${SKILL_FOLDER}/${name}`), null, 2)};\n\nexport const files = ${JSON.stringify(files, null, 2)};\n`;
 
     mkdirSync(join(out, "group"), { recursive: true });
     writeFileSync(join(out, "group", "files.js"), data);
