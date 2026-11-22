@@ -71,9 +71,9 @@ test("the contributed module is a relative path to a JavaScript module inside th
 test("package.json is a private module that ships plugin.json", () => {
   assert.equal(pkg.private, true);
   assert.equal(pkg.type, "module");
-  assert.deepEqual(pkg.files, ["plugin.json", "group/superpowers.js", "group/files.js", "group/superpowers.LICENSE"]);
+  assert.deepEqual(pkg.files, ["plugin.json", "group/superpowers.js", "group/superpowers.LICENSE"]);
   // The release build writes the two generated files, which the repository does not track (.gitignore).
-  const GENERATED = ["group/files.js", "group/superpowers.LICENSE"];
+  const GENERATED = ["group/superpowers.js", "group/superpowers.LICENSE"];
   for (const path of GENERATED) assert.ok(read(".gitignore").split("\n").includes("/" + path), path + " is not ignored");
   assert.ok(pkg.files.filter((path) => !GENERATED.includes(path)).every((path) => exists(path)), "a tracked file that package.json names does not exist");
 });

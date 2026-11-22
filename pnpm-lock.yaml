@@ -11,6 +11,9 @@ importers:
       '@soksak/kit':
         specifier: https://github.com/soksak-app/kit/releases/download/v0.0.14/soksak-kit-0.0.14.tgz
         version: https://github.com/soksak-app/kit/releases/download/v0.0.14/soksak-kit-0.0.14.tgz
+      es-module-lexer:
+        specifier: ^3.0.5
+        version: 3.0.5
 
 packages:
 
@@ -21,6 +24,9 @@ packages:
 
   ajv@8.20.0:
     resolution: {integrity: sha512-Thbli+OlOj+iMPYFBVBfJ3OmCAnaSyNn4M1vz9T6Gka5Jt9ba/HIR56joy65tY6kx/FCF5VXNB819Y7/GUrBGA==}
+
+  es-module-lexer@3.0.5:
+    resolution: {integrity: sha512-RNq2lKJw53c7z9QRHeiKeA6Ez0oikOqiBGdmxQhKDxEiOX1g5QJR4IoFVwicn8uCZcRWNrXC3NZaJihgK7aEbg==}
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
@@ -52,6 +58,8 @@ snapshots:
       fast-uri: 3.1.9
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
+
+  es-module-lexer@3.0.5: {}
 
   fast-deep-equal@3.1.3: {}
 

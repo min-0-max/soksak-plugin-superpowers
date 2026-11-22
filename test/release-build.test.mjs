@@ -1,16 +1,16 @@
 // Checks the release build of the superpowers group on a fixture of the upstream layout (obra/superpowers v7.0.2).
-// The build checks the sha256 of the release file, copies the Claude plugin files at their upstream paths into
-// group/files.js, and ships the LICENSE of the release (scripts/build-release.mjs).
+// The build checks the sha256 of the release file, writes the skill files into the one self-contained module
+// group/superpowers.js, and ships the LICENSE of the release (scripts/build-release.mjs).
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, readdirSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import test from "node:test";
 import { buildRelease } from "../scripts/build-release.mjs";
-import { groupFrom } from "../group/superpowers.js";
+import { init, parse } from "es-module-lexer";
 
 const VERSION = "v7.0.2";
 const here = dirname(fileURLToPath(import.meta.url));
@@ -38,9 +38,20 @@ async function withBuild(run, mutate) {
   }
 }
 
+// Imports the built module and returns the group object that its group() returns.
 async function dataOf(out) {
-  return import(pathToFileURL(join(out, "group", "files.js")).href);
+  return (await import(pathToFileURL(join(out, "group", "superpowers.js")).href)).group();
 }
+
+// Core grants the page of the providing plugin only the contributed module file (core docs/spec/plugins.md), so the module
+// must import no other module: a static or dynamic import of a sibling file is refused and the group fails to load.
+test("the built module is one self-contained ES module with no static or dynamic import", () => withBuild(async ({ releaseFile, sha256, out }) => {
+  buildRelease({ releaseFile, sha256, version: VERSION, out });
+  await init;
+  const [imports] = parse(readFileSync(join(out, "group", "superpowers.js"), "utf8"));
+  assert.deepEqual(imports.map((entry) => entry.n ?? "<dynamic>"), []);
+  assert.deepEqual(readdirSync(join(out, "group")).sort(), ["superpowers.LICENSE", "superpowers.js"]);
+}));
 
 test("the build writes the skill folders of the release under .claude/skills/, and no other upstream file", () => withBuild(async ({ releaseFile, sha256, out }) => {
   buildRelease({ releaseFile, sha256, version: VERSION, out });
@@ -67,13 +78,12 @@ test("each file keeps the upstream text, and the cursor hook file is not shipped
   assert.equal(files.some((file) => file.path.includes("cursor")), false);
 }));
 
-test("the data module names the skill folders and the one agent of the group", () => withBuild(async ({ releaseFile, sha256, out }) => {
+test("the built group names the skill folders and the one agent of the group", () => withBuild(async ({ releaseFile, sha256, out }) => {
   buildRelease({ releaseFile, sha256, version: VERSION, out });
   const data = await dataOf(out);
   assert.deepEqual(data.skills, [".claude/skills/brainstorming", ".claude/skills/using-superpowers"]);
   assert.deepEqual(data.agents, [{ name: "superpowers", path: ".claude/skills/using-superpowers/SKILL.md", cli: "claude" }]);
-  const group = groupFrom(data);
-  assert.deepEqual(group.agents, data.agents);
+  assert.equal(data.id, "superpowers");
 }));
 
 test("the build ships the LICENSE of the release as group/superpowers.LICENSE", () => withBuild(async ({ releaseFile, sha256, out }) => {
@@ -110,7 +120,7 @@ test("the build marks each file whose upstream header mode has an execute bit wi
   const { files } = await dataOf(out);
   assert.deepEqual(files.filter((file) => "executable" in file).map((file) => file.path), [".claude/skills/brainstorming/scripts/run.sh"]);
   assert.equal(files.find((file) => file.path === ".claude/skills/brainstorming/scripts/run.sh").executable, true);
-  assert.equal(groupFrom(await dataOf(out)).files.find((file) => file.path === ".claude/skills/brainstorming/scripts/run.sh").executable, true);
+  assert.equal((await dataOf(out)).files.find((file) => file.path === ".claude/skills/brainstorming/scripts/run.sh").executable, true);
 }, (top) => chmodSync(join(top, "skills", "brainstorming", "scripts", "run.sh"), 0o755)));
 
 test("a file whose upstream header mode has no execute bit gets no executable member", () => withBuild(async ({ releaseFile, sha256, out }) => {

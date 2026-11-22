@@ -2,6 +2,7 @@
 
 [English](CHANGELOG.md)
 
+- S10: Release build가 기여 module `group/superpowers.js`를 data를 안에 담고 import가 없는 자기 완결된 ES module 하나로 쓴다. core가 제공 plugin의 page에 그 파일만 허용하기 때문이다. `groupFrom`의 source는 `src/group.js`로 옮기고, `group/files.js`는 없앤다. version은 0.0.2다. Test: `test/release-build.test.mjs`가 build된 module을 `es-module-lexer`로 parse하고 static import와 dynamic import가 없기를 요구한다.
 - S9: `package.json`이 license MIT를 선언해서 registry가 release를 싣는다. version은 0.0.1이다.
 - S8: Workflow `ci.yml`과 `release.yml`이 push마다 검사하고 `make pack`으로 release한다.
 - S7: release build가 tarball을 header mode 그대로(`tar -xzpf`) 풀고, upstream 파일에 실행 bit가 있는 `files` 항목에 `executable: true`를 표시해요(`scripts/build-release.mjs`). `group/superpowers.js`는 member를 넘기고 boolean이 아닌 값을 거절해요. 테스트: `test/release-build.test.mjs`(제한적 umask 아래의 표시, bit가 없을 때 표시 없음)와 `test/group-shape.test.mjs`.

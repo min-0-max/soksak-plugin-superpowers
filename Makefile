@@ -9,7 +9,7 @@ install:
 test:
 	pnpm test
 
-# build writes group/files.js and group/superpowers.LICENSE from the release pinned in release/upstream.json (it fetches the release file when none is given).
+# build writes group/superpowers.js and group/superpowers.LICENSE from the release pinned in release/upstream.json (it fetches the release file when none is given).
 build:
 	pnpm run release
 

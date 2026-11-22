@@ -1,22 +1,17 @@
-// The superpowers group of the agents.makers interface (agents docs/spec/makers.md). The agents plugin imports this module
-// and calls group() for each connected item. The release build writes group/files.js, a data module with the skill folders,
-// the agent and the files of the skill folders of the pinned obra/superpowers release, each with its project path under .claude/skills/.
+// The source of the superpowers group of the agents.makers interface (agents docs/spec/makers.md). The release build writes
+// group/superpowers.js: the constant DATA with the skill folders, the agent and the files of the pinned obra/superpowers
+// release, then this text, then group(), which returns groupFrom(DATA). The agents plugin imports that one module and calls
+// group() for each connected item. Core grants the page of the providing plugin only the contributed module file
+// (core docs/spec/plugins.md), so this text imports no module and the built module is self-contained.
 // superpowers changes no upstream file: the release build copies the text as the release holds it.
-
-const DATA_URL = new URL("./files.js", import.meta.url);
 
 // The project folders that the group creates; every file path lies inside one of them (agents docs/spec/makers.md).
 const FOLDERS = [".superpowers/", ".claude/skills/"];
 
-// Imports the data module that the release build wrote and returns the group object. A missing module, or one that does
-// not match the shape, rejects with an error that names the module and the field.
-export async function group() {
-  return groupFrom(await import(DATA_URL.href));
-}
-
-// Builds the group object from a data module namespace with the members agents, skills and files.
+// Builds the group object from data with the members agents, skills and files. Data that does not match the shape is an
+// error that names the field.
 export function groupFrom(data) {
-  if (!isObject(data)) fail("module", "must export agents, skills and files");
+  if (!isObject(data)) fail("", "must hold agents, skills and files");
   const files = checkFiles(data);
   const agents = checkAgents(data, files);
   const skills = checkSkills(data);
@@ -42,7 +37,7 @@ export function groupFrom(data) {
 }
 
 function fail(field, reason) {
-  throw new Error(`group/files.js: ${field} ${reason}`);
+  throw new Error(`group/superpowers.js: DATA.${field} ${reason}`);
 }
 
 // Each entry holds a project path inside a folder of FOLDERS and the text of the file; a path is unique.

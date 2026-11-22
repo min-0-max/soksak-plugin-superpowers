@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // Builds the generated files of the superpowers group from the obra/superpowers release pinned in release/upstream.json:
-//   group/files.js              the data module: the skill folders (.claude/skills/<name> with SKILL.md), the agent (the main
-//                               skill file) and every file of those folders with its project path and text
+//   group/superpowers.js        the contributed module: the constant DATA with the skill folders (.claude/skills/<name> with
+//                               SKILL.md), the agent (the main skill file) and every file of those folders with its project
+//                               path and text, then the text of src/group.js, then group(). Core grants the page of the
+//                               providing plugin only this file (core docs/spec/plugins.md), so the module imports nothing.
 //   group/superpowers.LICENSE   the LICENSE of the release
 // The skill folders of the release are skills/<name>, and the project copy lies under .claude/skills/, where Claude Code reads
 // project skills. The plugin manifest and the hooks are a Claude Code plugin install concern, so they are not project files.
@@ -35,7 +37,7 @@ function readText(path, file) {
   }
 }
 
-// buildRelease checks the release file and writes group/files.js and group/superpowers.LICENSE under out. Every check runs before the first write.
+// buildRelease checks the release file and writes group/superpowers.js and group/superpowers.LICENSE under out. Every check runs before the first write.
 export function buildRelease({ releaseFile, sha256, version, out }) {
   if (typeof version !== "string" || version === "") throw new Error("buildRelease requires the release version");
   const digest = createHash("sha256").update(readFileSync(releaseFile)).digest("hex");
@@ -70,10 +72,11 @@ export function buildRelease({ releaseFile, sha256, version, out }) {
     }
 
     const agents = [{ name: "superpowers", path: AGENT_FILE, cli: "claude" }];
-    const data = `export const agents = ${JSON.stringify(agents, null, 2)};\n\nexport const skills = ${JSON.stringify(skills.map((name) => `${SKILL_FOLDER}/${name}`), null, 2)};\n\nexport const files = ${JSON.stringify(files, null, 2)};\n`;
+    const data = { agents, skills: skills.map((name) => `${SKILL_FOLDER}/${name}`), files };
+    const module = `const DATA = ${JSON.stringify(data, null, 2)};\n\n${readFileSync(join(ROOT, "src", "group.js"), "utf8")}\n// Returns the group object of the data that the release build wrote.\nexport async function group() {\n  return groupFrom(DATA);\n}\n`;
 
     mkdirSync(join(out, "group"), { recursive: true });
-    writeFileSync(join(out, "group", "files.js"), data);
+    writeFileSync(join(out, "group", "superpowers.js"), module);
     copyFileSync(license, join(out, "group", "superpowers.LICENSE"));
   } finally {
     rmSync(work, { recursive: true, force: true });

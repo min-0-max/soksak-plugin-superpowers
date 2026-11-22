@@ -1,6 +1,6 @@
 {
   "name": "@soksak/plugin-superpowers",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.24.0",
@@ -16,7 +16,6 @@
   "files": [
     "plugin.json",
     "group/superpowers.js",
-    "group/files.js",
     "group/superpowers.LICENSE"
   ],
   "scripts": {
@@ -25,6 +24,7 @@
     "release": "node scripts/build-release.mjs"
   },
   "devDependencies": {
-    "@soksak/kit": "https://github.com/soksak-app/kit/releases/download/v0.0.14/soksak-kit-0.0.14.tgz"
+    "@soksak/kit": "https://github.com/soksak-app/kit/releases/download/v0.0.14/soksak-kit-0.0.14.tgz",
+    "es-module-lexer": "^3.0.5"
   }
 }

@@ -1,9 +1,9 @@
-// Checks the group object that group/superpowers.js builds from the data module, with literal expectations, against the
+// Checks the group object that src/group.js builds from the data, with literal expectations, against the
 // group object of the agents.makers interface (agents docs/spec/makers.md).
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { groupFrom } from "../group/superpowers.js";
+import { groupFrom } from "../src/group.js";
 
 const manifest = JSON.parse(readFileSync(new URL("../plugin.json", import.meta.url), "utf8"));
 const item = manifest.contributes["agents.makers"][0];
@@ -30,9 +30,8 @@ test("groupFrom passes the executable member of a file, and refuses a value that
   assert.throws(() => groupFrom(data({ files: refused })), /files\[0\]\.executable must be a boolean/);
 });
 
-test("the module exports the functions group and groupFrom", async () => {
-  const module = await import("../group/superpowers.js");
-  assert.equal(typeof module.group, "function");
+test("the source exports the function groupFrom", async () => {
+  const module = await import("../src/group.js");
   assert.equal(typeof module.groupFrom, "function");
 });
 

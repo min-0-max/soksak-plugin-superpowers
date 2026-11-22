@@ -2,6 +2,7 @@
 
 [한국어](CHANGELOG.ko.md)
 
+- S10: The release build writes the contributed module `group/superpowers.js` as one self-contained ES module with the data inline and no import, because core grants the page of the providing plugin only that file; the source of `groupFrom` moves to `src/group.js`, and `group/files.js` is removed. The version is 0.0.2. Test: `test/release-build.test.mjs` parses the built module with `es-module-lexer` and requires no static or dynamic import.
 - S9: `package.json` declares the license MIT, so the registry lists the release; the version is 0.0.1.
 - S8: The workflows `ci.yml` and `release.yml` check each push and release with `make pack`.
 - S7: The release build extracts the tarball with its header modes (`tar -xzpf`) and marks each `files` entry whose upstream file has an execute bit with `executable: true` (`scripts/build-release.mjs`). `group/superpowers.js` passes the member through and refuses a value that is not a boolean. Tests: `test/release-build.test.mjs` (the mark under a restrictive umask, and no mark without the bit) and `test/group-shape.test.mjs`.
