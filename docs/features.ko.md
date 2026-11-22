@@ -1,0 +1,5 @@
+# 기능
+
+- [o] S1 — P1: Manifest와 contribution. `plugin.json`은 id `superpowers`, `@soksak/plugin-agents`에 대한 dependency, extension point `agents.makers`의 item 하나(`range`, `module`)를 선언하고, surface, sections, sidebars, data는 선언하지 않는다. 입력: core `docs/spec/plugins.md`의 `plugin.json` 표와 agent workspace plan의 메이커 plugin 규칙. 기대: `plugin.json`에는 `id`, `name`, `description`, `dependencies`, `contributes` 멤버만 있고, `test/manifest-shape.test.mjs`가 각 멤버를 리터럴 기대값으로 검사한다. 진행: manifest, `package.json`, `Makefile`, test가 준비되었고 `pnpm test`가 9개 중 9개 통과한다. `range` 값은 잠정값이다. `agents.makers` 버전을 발행하는 `agents` plugin이 이 workspace에 없기 때문이다.
+- [!] S2 — P2: superpowers plugin 폴더의 설치 때 교정. 보류: plugin 폴더를 설치 때 고치는 코드를 쓰지 않는다. 원인: `club.md`의 교정 표는 superpowers를 `지시만`으로 적고, 측정 C5와 C8은 교정 없는 superpowers plugin 폴더로 실행했다. 이 항목의 요청은 그 폴더의 설치 때 교정을 말하므로 두 내용이 맞지 않는다. 재개 조건: `club.md`가 둘 중 어느 것이 맞는지 밝힌다.
+- [ ] S3 — P2: Group module. `contributes`가 가리키는 module `group/superpowers.js`가 superpowers group을 내보낸다. 내용은 plugin 폴더, agent 정의, 스킬, 실행 변수, `.superpowers/` 프로젝트 폴더와 그 위치 규칙이다. 대기 조건: `agents` plugin이 발행하는 `agents.makers` interface(point 버전과 item schema). `agents` 저장소는 아직 이 workspace에 없다.

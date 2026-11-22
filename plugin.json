@@ -1,0 +1,16 @@
+{
+  "id": "superpowers",
+  "name": "Superpowers",
+  "description": "Contributes the superpowers maker group to the agents plugin. The plugin has no surface, so it adds no card and no sidebar section.",
+  "dependencies": {
+    "@soksak/plugin-agents": ">=0.0.1"
+  },
+  "contributes": {
+    "agents.makers": [
+      {
+        "range": ">=0.0.1",
+        "module": "group/superpowers.js"
+      }
+    ]
+  }
+}
