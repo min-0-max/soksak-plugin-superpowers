@@ -7,6 +7,7 @@ Superpowers plugin: contributes the superpowers maker group to the `agents` plug
 ```sh
 make install                                # once: the locked dependencies
 make test                                   # tests of this plugin
+make build                                  # group/files.js from the pinned release
 make check                                  # document and command checks of the pinned kit release
 make pack OUT=<folder>                      # the plugin release
 ```

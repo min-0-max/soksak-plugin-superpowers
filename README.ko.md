@@ -7,6 +7,7 @@ Superpowers plugin: `agents` plugin에 superpowers 메이커 group을 기여한�
 ```sh
 make install                                # 한 번: 고정된 dependency
 make test                                   # 이 plugin의 test
+make build                                  # 고정된 release의 group/files.js
 make check                                  # 고정된 kit release의 document와 command 검사
 make pack OUT=<folder>                      # plugin release
 ```
