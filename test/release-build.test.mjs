@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -98,3 +98,23 @@ test("a release without the agent skill file is refused, and names the file", ()
 test("a file that is not UTF-8 text is refused, and the error names it", () => withBuild(async ({ releaseFile, sha256, out }) => {
   assert.throws(() => buildRelease({ releaseFile, sha256, version: VERSION, out }), /skills\/brainstorming\/scripts\/run\.sh/);
 }, (top) => writeFileSync(join(top, "skills", "brainstorming", "scripts", "run.sh"), Buffer.from([0xff, 0xfe, 0x00]))));
+
+test("the build marks each file whose upstream header mode has an execute bit with executable true, under any umask of the build", () => withBuild(async ({ releaseFile, sha256, out }) => {
+  // A restrictive umask would clear the execute bit of an extraction without the header modes.
+  const previous = process.umask(0o077);
+  try {
+    buildRelease({ releaseFile, sha256, version: VERSION, out });
+  } finally {
+    process.umask(previous);
+  }
+  const { files } = await dataOf(out);
+  assert.deepEqual(files.filter((file) => "executable" in file).map((file) => file.path), [".claude/skills/brainstorming/scripts/run.sh"]);
+  assert.equal(files.find((file) => file.path === ".claude/skills/brainstorming/scripts/run.sh").executable, true);
+  assert.equal(groupFrom(await dataOf(out)).files.find((file) => file.path === ".claude/skills/brainstorming/scripts/run.sh").executable, true);
+}, (top) => chmodSync(join(top, "skills", "brainstorming", "scripts", "run.sh"), 0o755)));
+
+test("a file whose upstream header mode has no execute bit gets no executable member", () => withBuild(async ({ releaseFile, sha256, out }) => {
+  buildRelease({ releaseFile, sha256, version: VERSION, out });
+  const { files } = await dataOf(out);
+  assert.equal(files.some((file) => "executable" in file), false);
+}, (top) => chmodSync(join(top, "skills", "brainstorming", "scripts", "run.sh"), 0o644)));

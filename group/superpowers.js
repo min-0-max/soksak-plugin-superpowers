@@ -58,7 +58,9 @@ function checkFiles(data) {
     if (seen.has(file.path)) fail(`${field}.path`, `${file.path} repeats an earlier entry`);
     seen.add(file.path);
     if (typeof file.text !== "string") fail(`${field}.text`, "must be a string");
-    return { path: file.path, text: file.text };
+    if (file.executable !== undefined && typeof file.executable !== "boolean") fail(`${field}.executable`, "must be a boolean");
+    // The member is kept only when the data module states it, so an entry without it keeps the shape of the earlier build.
+    return file.executable === undefined ? { path: file.path, text: file.text } : { path: file.path, text: file.text, executable: file.executable };
   });
 }
 

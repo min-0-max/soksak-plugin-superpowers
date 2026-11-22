@@ -8,7 +8,7 @@
 // The release file must equal its sha256 pin before anything is extracted or written. The build reads no other network address.
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync, copyFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync, copyFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -43,7 +43,8 @@ export function buildRelease({ releaseFile, sha256, version, out }) {
 
   const work = mkdtempSync(join(tmpdir(), "superpowers-release-"));
   try {
-    execFileSync("tar", ["-xzf", releaseFile, "-C", work]);
+    // -p restores the header modes exactly. Without it, the umask of the build clears the execute bit of an upstream file.
+    execFileSync("tar", ["-xzpf", releaseFile, "-C", work]);
     const top = readdirSync(work);
     if (top.length !== 1) throw new Error(`release file must hold one top folder, found: ${top.join(", ")}`);
     const source = join(work, top[0]);
@@ -60,7 +61,11 @@ export function buildRelease({ releaseFile, sha256, version, out }) {
     if (!skills.includes("using-superpowers")) throw new Error(`release file holds no skills/using-superpowers/SKILL.md`);
     for (const name of skills) {
       for (const file of listFiles(join(skillSource, name)).sort()) {
-        files.push({ path: `${SKILL_FOLDER}/${name}/${file}`, text: readText(join(source, "skills", name, file), `skills/${name}/${file}`) });
+        const upstream = join(skillSource, name, file);
+        const entry = { path: `${SKILL_FOLDER}/${name}/${file}`, text: readText(upstream, `skills/${name}/${file}`) };
+        // A file whose header mode has an execute bit carries executable true, so the import sets the bit of the project file.
+        if ((statSync(upstream).mode & 0o111) !== 0) entry.executable = true;
+        files.push(entry);
       }
     }
 

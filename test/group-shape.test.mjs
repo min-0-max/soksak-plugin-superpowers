@@ -22,6 +22,14 @@ function data(overrides = {}) {
   };
 }
 
+test("groupFrom passes the executable member of a file, and refuses a value that is not a boolean", () => {
+  const marked = data().files.map((file, i) => (i === 0 ? { ...file, executable: true } : file));
+  assert.equal(groupFrom(data({ files: marked })).files[0].executable, true);
+  assert.equal("executable" in groupFrom(data()).files[0], false);
+  const refused = data().files.map((file, i) => (i === 0 ? { ...file, executable: "yes" } : file));
+  assert.throws(() => groupFrom(data({ files: refused })), /files\[0\]\.executable must be a boolean/);
+});
+
 test("the module exports the functions group and groupFrom", async () => {
   const module = await import("../group/superpowers.js");
   assert.equal(typeof module.group, "function");
