@@ -49,11 +49,11 @@ test("dependencies name only the agents plugin, with a version range", () => {
 });
 
 // The plugin contributes to the extension point agents.makers of the agents plugin, so agents must be in dependencies.
-test("contributes holds one item of the agents.makers point, with range and module only", () => {
+test("contributes holds one item of the agents.makers point, with range, module, id and name only", () => {
   assert.deepEqual(Object.keys(manifest.contributes), ["agents.makers"]);
   assert.equal(manifest.contributes["agents.makers"].length, 1);
   const [item] = manifest.contributes["agents.makers"];
-  assert.deepEqual(Object.keys(item).sort(), ["module", "range"]);
+  assert.deepEqual(Object.keys(item).sort(), ["id", "module", "name", "range"]);
   assert.match(item.range, /^[<>=^~]*\d/);
 });
 
@@ -71,6 +71,6 @@ test("the contributed module is a relative path to a JavaScript module inside th
 test("package.json is a private module that ships plugin.json", () => {
   assert.equal(pkg.private, true);
   assert.equal(pkg.type, "module");
-  assert.deepEqual(pkg.files, ["plugin.json"]);
+  assert.deepEqual(pkg.files, ["plugin.json", "group/superpowers.js"]);
   assert.ok(pkg.files.every((path) => exists(path)), "a file that package.json names does not exist");
 });

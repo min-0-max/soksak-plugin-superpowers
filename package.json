@@ -13,7 +13,8 @@
     "soksak": "^0.0.46"
   },
   "files": [
-    "plugin.json"
+    "plugin.json",
+    "group/superpowers.js"
   ],
   "scripts": {
     "test": "node --test --test-timeout=120000 test/"

@@ -9,7 +9,9 @@
     "agents.makers": [
       {
         "range": "^0.0.1",
-        "module": "group/superpowers.js"
+        "module": "group/superpowers.js",
+        "id": "superpowers",
+        "name": "Superpowers"
       }
     ]
   }
